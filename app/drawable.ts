@@ -13,11 +13,17 @@ export class Drawable {
     public canvasHeight: number;
     public canvasWidth: number;
     public context: CanvasRenderingContext2D;
+    public collidableWith: string;
+    public isColliding: boolean;
+    public type: string;
 
     constructor() {
         this.speed = 0;
         this.canvasWidth = 0;
         this.canvasHeight = 0;
+        this.collidableWith = '';
+        this.isColliding = false;
+        this.type = '';
     }
 
     init(x: number, y: number, width?: number, height?: number) {
@@ -32,4 +38,8 @@ export class Drawable {
     // Define abstract function to be implemented in child objects
     draw() { }
     move() { }
+
+    isCollidableWith(object: any) {
+        return (this.collidableWith === object.type);
+    };
 }

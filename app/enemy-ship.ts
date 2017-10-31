@@ -14,12 +14,18 @@ export class EnemyShip extends Drawable {
     rightEdge: number;
     bottomEdge: number;
     bulletPool: Pool;
+    collidableWith: string;
+    type: string;
+
+
     constructor() {
         super();
         this.percentFire = 0.005;
         this.chance = 0;
         this.alive = false;
         this.bulletPool = new Pool(30);
+        this.collidableWith = 'bullet';
+        this.type = 'enemyShip';
     }
 
     setAreaBulletPool(context: CanvasRenderingContext2D, canvasHeight: number, canvasWidth: number) {
@@ -28,6 +34,7 @@ export class EnemyShip extends Drawable {
         this.bulletPool.canvasWidth = canvasWidth;
         this.bulletPool.init('shipEnemyBullet');
     }
+
 
 	/*
 	 * Sets the Enemy values
@@ -62,13 +69,20 @@ export class EnemyShip extends Drawable {
             this.y -= 5;
             this.speedX = -this.speed;
         }
-        this.context.drawImage(ImageRepository.ship_enemy, this.x, this.y);
-        // Enemy has a chance to shoot every movement
-        this.chance = Math.floor(Math.random() * (1000 + 1));
-        if (this.chance / 1000 < this.percentFire) {
-            this.fire();
+
+        if (!this.isColliding) {
+            this.context.drawImage(ImageRepository.ship_enemy, this.x, this.y);
+            // Enemy has a chance to shoot every movement
+            this.chance = Math.floor(Math.random() * (1000 + 1));
+            if (this.chance / 1000 < this.percentFire) {
+                this.fire();
+            }
+            this.bulletPool.animate();
+
+            return false;
+        } else {
+            return true;
         }
-        this.bulletPool.animate();
     };
     /*
      * Fires a bullet
@@ -87,5 +101,7 @@ export class EnemyShip extends Drawable {
         this.speedX = 0;
         this.speedY = 0;
         this.alive = false;
+        this.alive = false;
+        this.isColliding = false;
     };
 }

@@ -2,6 +2,8 @@ import { Background } from './background';
 import { Ship } from './ship';
 import { Pool } from './pool';
 import { Bullet } from './bullet';
+import { EnemyShip } from './enemy-ship';
+import { QuadTree } from './quad-tree';
 import ImageRepository from './image-repository';
 /**
  * Creates the Game object which will hold all objects and data for
@@ -20,9 +22,10 @@ export class Game {
     private background: Background;
     private ship: Ship;
     private enemyShipPool: Pool;
+    private quadTree: QuadTree;
 
     constructor() {
-        this.background = new Background
+        this.background = new Background;
     }
 	/*
 	 * Gets canvas information and context and sets up all game
@@ -42,6 +45,15 @@ export class Game {
             this.bgContext = this.bgCanvas.getContext('2d');
             this.shipContext = this.shipCanvas.getContext('2d');
             this.mainContext = this.mainCanvas.getContext('2d');
+
+            this.quadTree = new QuadTree(
+                {
+                    x: 0,
+                    y: 0,
+                    width: this.mainCanvas.width,
+                    height: this.mainCanvas.height
+                }
+            );
 
             // Initialize objects to contain their context and canvas
             // information
@@ -104,11 +116,52 @@ export class Game {
     };
 
     private animate() {
+
+        this.quadTree.clear();
+        this.quadTree.insert(this.ship);
+
+        this.quadTree.insert(this.ship.bulletPool.getPool());
+
+        this.quadTree.insert(this.enemyShipPool.getPool());
+
+        // Pools of ships enemies alives
+        this.enemyShipPool.getPool().map((enemy: EnemyShip) => {
+            this.quadTree.insert(enemy.bulletPool.getPool());
+        });
+
+        // Pools of ships enemies dead
+        this.enemyShipPool.getPoolAliveBulletsOfDeadEnemies().map((poolBullet: Pool) => {
+            this.quadTree.insert(poolBullet);
+        });
+        this.detectCollision();
+
         window.requestAnimFrame(this.animate.bind(this));
         this.background.draw();
         this.ship.move()
         this.ship.bulletPool.animate();
         this.enemyShipPool.animate();
+    }
+
+    private detectCollision() {
+        let objects: Array<any> = [];
+        this.quadTree.getAllObjects(objects);
+        for (let x = 0, len = objects.length; x < len; x++) {
+            let obj: Array<any>;
+            this.quadTree.findObjects(obj = [], objects[x]);
+
+            for (let y = 0, length = obj.length; y < length; y++) {
+
+                // DETECT COLLISION ALGORITHM
+                if (objects[x].collidableWith === obj[y].type &&
+                    (objects[x].x < obj[y].x + obj[y].width &&
+                        objects[x].x + objects[x].width > obj[y].x &&
+                        objects[x].y < obj[y].y + obj[y].height &&
+                        objects[x].y + objects[x].height > obj[y].y)) {
+                    objects[x].isColliding = true;
+                    obj[y].isColliding = true;
+                }
+            }
+        }
     }
 }
 

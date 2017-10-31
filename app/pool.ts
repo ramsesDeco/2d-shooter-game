@@ -13,6 +13,7 @@ export class Pool {
     canvasHeight: number;
     canvasWidth: number;
 
+
     constructor(maxSize: number) {
         this.size = maxSize;
         this.pool = [];
@@ -22,7 +23,7 @@ export class Pool {
 	 */
     init(type: string) {
 
-        if (type == "bullet") {
+        if (type == 'bullet') {
             for (let i = 0; i < this.size; i++) {
                 // Initalize the object
                 let bullet = new Bullet();
@@ -30,10 +31,12 @@ export class Pool {
                 bullet.context = this.context;
                 bullet.canvasHeight = this.canvasHeight;
                 bullet.canvasWidth = this.canvasWidth;
+                bullet.collidableWith = 'enemyShip';
+                bullet.type = 'bullet';
                 this.pool[i] = bullet;
             }
         }
-        else if (type == "enemyShip") {
+        else if (type == 'enemyShip') {
             for (let i = 0; i < this.size; i++) {
                 let enemy = new EnemyShip();
                 enemy.context = this.context;
@@ -41,15 +44,18 @@ export class Pool {
                 enemy.canvasWidth = this.canvasWidth;
                 enemy.init(0, 0, ImageRepository.ship_enemy.width, ImageRepository.ship_enemy.height);
                 enemy.setAreaBulletPool(enemy.context, enemy.canvasHeight, enemy.canvasWidth);
+
                 this.pool[i] = enemy;
             }
         }
-        else if (type == "shipEnemyBullet") {
+        else if (type == 'shipEnemyBullet') {
             for (let i = 0; i < this.size; i++) {
                 let bullet = new Bullet();
                 bullet.markAsEnemyBullet();
                 bullet.init(0, 0, ImageRepository.ship_enemyBullet.width, ImageRepository.ship_enemyBullet.height);
 
+                bullet.collidableWith = 'ship';
+                bullet.type = 'shipEnemyBullet';
                 bullet.context = this.context;
                 bullet.canvasHeight = this.canvasHeight;
                 bullet.canvasWidth = this.canvasWidth;
@@ -58,6 +64,33 @@ export class Pool {
         }
 
     };
+
+    getPool() {
+        let obj: Array<any> = [];
+        for (let i = 0; i < this.size; i++) {
+            if (this.pool[i].alive) {
+                obj.push(this.pool[i]);
+            }
+        }
+        return obj;
+    }
+
+    /**
+     * this is for Enemies that has a Pool of bullets
+     */
+    getPoolAliveBulletsOfDeadEnemies() {
+        let obj: Array<any> = [];
+        for (let i = 0; i < this.size; i++) {
+            if (!this.pool[i].alive) {
+                for (let j = 0; j < (<EnemyShip>this.pool[i]).bulletPool.size; j++) {
+                    obj.push((<EnemyShip>this.pool[i]).bulletPool.getPool());
+                }
+            }
+        }
+        return obj;
+    }
+
+
     /*
      * Grabs the last item in the list and initializes it and
      * pushes it to the front of the array.
@@ -94,7 +127,15 @@ export class Pool {
                 }
             }
             else {
-                break;
+                // if EnemyShip is destroyed, his bulletPool will be animate if some bullet is alive.
+                if ((<EnemyShip>this.pool[i]).bulletPool) {
+                    if ((<EnemyShip>this.pool[i]).bulletPool.getPool().length > 0) {
+                        (<EnemyShip>this.pool[i]).bulletPool.animate();
+                    }
+                } else {
+
+                    break;
+                }
             }
         }
     }

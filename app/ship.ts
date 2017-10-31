@@ -11,6 +11,8 @@ export class Ship extends Drawable {
     bulletPool: Pool;
     fireRate: number;
     counter: number;
+    collidableWith: string;
+    type: string;
 
     constructor() {
         super();
@@ -18,6 +20,8 @@ export class Ship extends Drawable {
         this.bulletPool = new Pool(30);
         this.fireRate = 15;
         this.counter = 0;
+        this.collidableWith = 'shipEnemyBullet';
+        this.type = 'ship';
     }
 
     draw() {
@@ -60,9 +64,11 @@ export class Ship extends Drawable {
                     this.y = this.canvasHeight - this.height;
             }
             // Finish by redrawing the ship
-            this.draw();
+            if (!this.isColliding) {
+                this.draw();
+            }
         }
-        if (KEY_STATUS.space && this.counter >= this.fireRate) {
+        if (KEY_STATUS.space && this.counter >= this.fireRate && !this.isColliding) {
             this.fire();
             this.counter = 0;
         }

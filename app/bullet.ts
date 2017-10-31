@@ -33,6 +33,9 @@ export class Bullet extends Drawable {
         this.context.clearRect(this.x, this.y, this.width, this.height);
         this.y -= this.speed;
 
+        if (this.isColliding) {
+            return true;
+        }
         if (!this.enemyBullet && this.y <= 0 - this.height) {
             return true;
         }
@@ -57,6 +60,7 @@ export class Bullet extends Drawable {
         this.y = 0;
         this.speed = 0;
         this.alive = false;
+		this.isColliding = false;
     };
 
     markAsEnemyBullet() {
