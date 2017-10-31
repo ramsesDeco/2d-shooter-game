@@ -1,3 +1,5 @@
+
+import GlobalEventService from './global-events';
 class ImageRepository {
     public empty: any = null;
     public background: HTMLImageElement;
@@ -6,7 +8,7 @@ class ImageRepository {
 
     public ship_enemy: HTMLImageElement;
     public ship_enemyBullet: HTMLImageElement;
-    
+
     private numLoaded: number;
     private numImages: number;
 
@@ -33,7 +35,7 @@ class ImageRepository {
     private imageLoaded() {
         this.numLoaded++;
         if (this.numLoaded === this.numImages) {
-            window.init();
+            GlobalEventService.init();
         }
     }
 }

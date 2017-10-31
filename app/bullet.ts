@@ -5,13 +5,11 @@ import { Drawable } from './drawable';
  * drawn on the "main" canvas.
  */
 export class Bullet extends Drawable {
-    alive: boolean; // Is true if the bullet is currently in use
 
     private enemyBullet: boolean;
 
     constructor() {
         super();
-        this.alive = false;
         this.enemyBullet = false;
     }
 	/*

@@ -16,6 +16,7 @@ export class Drawable {
     public collidableWith: string;
     public isColliding: boolean;
     public type: string;
+    public alive: boolean;
 
     constructor() {
         this.speed = 0;
@@ -23,6 +24,7 @@ export class Drawable {
         this.canvasHeight = 0;
         this.collidableWith = '';
         this.isColliding = false;
+        this.alive = false;
         this.type = '';
     }
 
@@ -32,6 +34,8 @@ export class Drawable {
         this.y = y;
         this.width = width;
         this.height = height;
+        this.isColliding = false;
+        this.alive = false;
     }
 
 

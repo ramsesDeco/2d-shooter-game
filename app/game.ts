@@ -5,6 +5,7 @@ import { Bullet } from './bullet';
 import { EnemyShip } from './enemy-ship';
 import { QuadTree } from './quad-tree';
 import ImageRepository from './image-repository';
+import GlobalEventService from './global-events';
 /**
  * Creates the Game object which will hold all objects and data for
  * the game.
@@ -21,11 +22,32 @@ export class Game {
 
     private background: Background;
     private ship: Ship;
-    private enemyShipPool: Pool;
+    private enemyPool: Pool;
     private quadTree: QuadTree;
+    private shipStartX: number;
+    private shipStartY: number;
+    private playerScore: number;
+
 
     constructor() {
         this.background = new Background;
+        this.playerScore = 0;
+
+        this.scoreBehavior();
+
+
+        document.getElementById('restart').addEventListener('click', (ev) => {
+            ev.stopPropagation();
+            console.log('restart');
+            this.restart();
+        });
+
+        document.addEventListener(GlobalEventService.gameOverEventName, (event: CustomEvent) => {
+            this.gameOver();
+        });
+        document.addEventListener(GlobalEventService.initEventName, (event: CustomEvent) => {
+            this.init();
+        });
     }
 	/*
 	 * Gets canvas information and context and sets up all game
@@ -68,6 +90,10 @@ export class Game {
             this.ship.canvasHeight = this.shipCanvas.height;
             this.ship.setAreaBulletPool(this.mainContext, this.mainCanvas.width, this.mainCanvas.height);
 
+            this.shipStartX = this.shipCanvas.width / 2 - ImageRepository.spaceship.width;
+            this.shipStartY = this.shipCanvas.height / 4 * 3 + ImageRepository.spaceship.height * 2;
+            this.ship.init(this.shipStartX, this.shipStartY, ImageRepository.spaceship.width,
+                ImageRepository.spaceship.height);
             // Bullet.prototype.context = this.mainContext;
             // Bullet.prototype.canvasWidth = this.mainCanvas.width;
             // Bullet.prototype.canvasHeight = this.mainCanvas.height;
@@ -75,34 +101,16 @@ export class Game {
             // Initialize the background object
             this.background.init(0, 0); // Set draw point to 0,0
 
-            let shipStartX = this.shipCanvas.width / 2 - ImageRepository.spaceship.width;
-            let shipStartY = this.shipCanvas.height / 4 * 3 + ImageRepository.spaceship.height * 2;
-            this.ship.init(shipStartX, shipStartY, ImageRepository.spaceship.width,
-                ImageRepository.spaceship.height);
 
 
 
             // Initialize the enemy pool object
-            this.enemyShipPool = new Pool(30);
-            this.enemyShipPool.context = this.mainContext;
-            this.enemyShipPool.canvasWidth = this.mainCanvas.width;
-            this.enemyShipPool.canvasHeight = this.mainCanvas.height;
-            this.enemyShipPool.init('enemyShip');
-            let height = ImageRepository.ship_enemy.height;
-            let width = ImageRepository.ship_enemy.width;
-            let x = 100;
-            let y = -height;
-            let spacer = y * 1.5;
-            for (let i = 1; i <= 18; i++) {
-                this.enemyShipPool.get(x, y, 2);
-                x += width + 25;
-                if (i % 6 == 0) {
-                    x = 100;
-                    y += spacer
-                }
-            }
-            // this.enemyBulletPool = new Pool(50);
-            // this.enemyBulletPool.init("enemyBullet");
+            this.enemyPool = new Pool(30);
+            this.enemyPool.context = this.mainContext;
+            this.enemyPool.canvasWidth = this.mainCanvas.width;
+            this.enemyPool.canvasHeight = this.mainCanvas.height;
+            this.enemyPool.init('enemyShip');
+            this.spawnWave();
             return true;
         } else {
             return false;
@@ -115,6 +123,23 @@ export class Game {
         this.animate();
     };
 
+    // Spawn a new wave of enemies
+    spawnWave() {
+        let height = ImageRepository.ship_enemy.height;
+        let width = ImageRepository.ship_enemy.width;
+        let x = 100;
+        let y = -height;
+        let spacer = y * 1.5;
+        for (let i = 1; i <= 18; i++) {
+            this.enemyPool.get(x, y, 2);
+            x += width + 25;
+            if (i % 6 == 0) {
+                x = 100;
+                y += spacer
+            }
+        }
+    }
+
     private animate() {
 
         this.quadTree.clear();
@@ -122,24 +147,31 @@ export class Game {
 
         this.quadTree.insert(this.ship.bulletPool.getPool());
 
-        this.quadTree.insert(this.enemyShipPool.getPool());
+        this.quadTree.insert(this.enemyPool.getPool());
 
         // Pools of ships enemies alives
-        this.enemyShipPool.getPool().map((enemy: EnemyShip) => {
+        this.enemyPool.getPool().map((enemy: EnemyShip) => {
             this.quadTree.insert(enemy.bulletPool.getPool());
         });
 
         // Pools of ships enemies dead
-        this.enemyShipPool.getPoolAliveBulletsOfDeadEnemies().map((poolBullet: Pool) => {
+        this.enemyPool.getPoolAliveBulletsOfDeadEnemies().map((poolBullet: Pool) => {
             this.quadTree.insert(poolBullet);
         });
         this.detectCollision();
 
-        window.requestAnimFrame(this.animate.bind(this));
-        this.background.draw();
-        this.ship.move()
-        this.ship.bulletPool.animate();
-        this.enemyShipPool.animate();
+        // No more enemies
+        if (this.enemyPool.getPool().length === 0) {
+            this.spawnWave();
+        }
+
+        if (this.ship.alive) {
+            window.requestAnimFrame(this.animate.bind(this));
+            this.background.draw();
+            this.ship.move()
+            this.ship.bulletPool.animate();
+            this.enemyPool.animate();
+        }
     }
 
     private detectCollision() {
@@ -162,6 +194,43 @@ export class Game {
                 }
             }
         }
+    }
+
+    // Game over
+    gameOver() {
+        document.getElementById('game-over').style.display = "block";
+    };
+    // Restart the game
+    restart() {
+        document.getElementById('game-over').style.display = "none";
+        this.bgContext.clearRect(0, 0, this.bgCanvas.width, this.bgCanvas.height);
+        this.shipContext.clearRect(0, 0, this.shipCanvas.width, this.shipCanvas.height);
+        this.mainContext.clearRect(0, 0, this.mainCanvas.width, this.mainCanvas.height);
+        this.quadTree.clear();
+        this.background.init(0, 0);
+
+        this.ship.setAreaBulletPool(this.mainContext, this.mainCanvas.width, this.mainCanvas.height);
+        this.ship.init(this.shipStartX, this.shipStartY,
+            ImageRepository.spaceship.width, ImageRepository.spaceship.height);
+        this.enemyPool.init("enemyShip");
+        this.spawnWave();
+        this.playerScore = 0;
+        this.printScore();
+        this.start();
+    };
+
+
+    private scoreBehavior() {
+        document.addEventListener(GlobalEventService.enemyDestoyEventName, (event: CustomEvent) => {
+            if (event.detail === 'enemyShip') {
+                this.playerScore += 10;
+            }
+            this.printScore();
+        });
+    }
+    private printScore() {
+        let score = document.getElementById('score');
+        score.innerHTML = `${this.playerScore}`;
     }
 }
 

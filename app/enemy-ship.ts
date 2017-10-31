@@ -1,13 +1,13 @@
 import ImageRepository from './image-repository';
 import { Drawable } from './drawable';
 import { Pool } from './pool';
+import GlobalEventService from './global-events';
 /**
  * Create the Enemy ship object.
  */
 export class EnemyShip extends Drawable {
     percentFire: number;
     chance: number;
-    alive: boolean;
     speedX: number;
     speedY: number;
     leftEdge: number;
@@ -22,7 +22,7 @@ export class EnemyShip extends Drawable {
         super();
         this.percentFire = 0.005;
         this.chance = 0;
-        this.alive = false;
+        // this.alive = false;
         this.bulletPool = new Pool(30);
         this.collidableWith = 'bullet';
         this.type = 'enemyShip';
@@ -81,6 +81,7 @@ export class EnemyShip extends Drawable {
 
             return false;
         } else {
+            GlobalEventService.enemyDestroyed('enemyShip');
             return true;
         }
     };

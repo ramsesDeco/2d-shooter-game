@@ -2,6 +2,7 @@ import ImageRepository from './image-repository';
 import { Drawable } from './drawable';
 import { Pool } from './pool';
 import { KEY_STATUS, KEY_CODES } from './key-codes';
+import GlobalEventService from './global-events';
 /**
  * Create the Ship object that the player controls. The ship is
  * drawn on the "ship" canvas and uses dirty rectangles to move
@@ -22,6 +23,13 @@ export class Ship extends Drawable {
         this.counter = 0;
         this.collidableWith = 'shipEnemyBullet';
         this.type = 'ship';
+        super.alive = true;
+    }
+
+    init(x: number, y: number, width?: number, height?: number) {
+        super.init(x, y, width, height);
+        super.alive = true;
+        super.isColliding = false;
     }
 
     draw() {
@@ -29,6 +37,7 @@ export class Ship extends Drawable {
     }
 
     setAreaBulletPool(context: CanvasRenderingContext2D, canvasHeight: number, canvasWidth: number) {
+        this.bulletPool = new Pool(30);
         this.bulletPool.context = context;
         this.bulletPool.canvasHeight = canvasHeight;
         this.bulletPool.canvasWidth = canvasWidth;
@@ -63,11 +72,16 @@ export class Ship extends Drawable {
                 if (this.y >= this.canvasHeight - this.height)
                     this.y = this.canvasHeight - this.height;
             }
-            // Finish by redrawing the ship
-            if (!this.isColliding) {
-                this.draw();
-            }
         }
+        // Redraw the ship
+        if (!this.isColliding) {
+            this.draw();
+        }
+        else {
+            this.alive = false;
+            GlobalEventService.gameOver();
+        }
+
         if (KEY_STATUS.space && this.counter >= this.fireRate && !this.isColliding) {
             this.fire();
             this.counter = 0;

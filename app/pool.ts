@@ -133,7 +133,6 @@ export class Pool {
                         (<EnemyShip>this.pool[i]).bulletPool.animate();
                     }
                 } else {
-
                     break;
                 }
             }
