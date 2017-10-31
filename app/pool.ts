@@ -1,12 +1,13 @@
 import ImageRepository from './image-repository';
 import { Bullet } from './bullet';
+import { EnemyShip } from './enemy-ship';
 /**
  * Custom Pool object. Holds Bullet objects to be managed to prevent
  * garbage collection.
  */
 export class Pool {
     size: number; // Max bullets allowed in the pool
-    pool: Array<Bullet>;
+    pool: Array<Bullet | EnemyShip>;
 
     context: CanvasRenderingContext2D;
     canvasHeight: number;
@@ -19,17 +20,43 @@ export class Pool {
 	/*
 	 * Populates the pool array with Bullet objects
 	 */
-    init() {
-        for (let i = 0; i < this.size; i++) {
-            // Initalize the bullet object
-            let bullet = new Bullet();
-            bullet.init(0, 0, ImageRepository.bullet.width,
-                ImageRepository.bullet.height);
-            bullet.context = this.context;
-            bullet.canvasHeight = this.canvasHeight;
-            bullet.canvasWidth = this.canvasWidth;
-            this.pool[i] = bullet;
+    init(type: string) {
+
+        if (type == "bullet") {
+            for (let i = 0; i < this.size; i++) {
+                // Initalize the object
+                let bullet = new Bullet();
+                bullet.init(0, 0, ImageRepository.bullet.width, ImageRepository.bullet.height);
+                bullet.context = this.context;
+                bullet.canvasHeight = this.canvasHeight;
+                bullet.canvasWidth = this.canvasWidth;
+                this.pool[i] = bullet;
+            }
         }
+        else if (type == "enemyShip") {
+            for (let i = 0; i < this.size; i++) {
+                let enemy = new EnemyShip();
+                enemy.context = this.context;
+                enemy.canvasHeight = this.canvasHeight;
+                enemy.canvasWidth = this.canvasWidth;
+                enemy.init(0, 0, ImageRepository.ship_enemy.width, ImageRepository.ship_enemy.height);
+                enemy.setAreaBulletPool(enemy.context, enemy.canvasHeight, enemy.canvasWidth);
+                this.pool[i] = enemy;
+            }
+        }
+        else if (type == "shipEnemyBullet") {
+            for (let i = 0; i < this.size; i++) {
+                let bullet = new Bullet();
+                bullet.markAsEnemyBullet();
+                bullet.init(0, 0, ImageRepository.ship_enemyBullet.width, ImageRepository.ship_enemyBullet.height);
+
+                bullet.context = this.context;
+                bullet.canvasHeight = this.canvasHeight;
+                bullet.canvasWidth = this.canvasWidth;
+                this.pool[i] = bullet;
+            }
+        }
+
     };
     /*
      * Grabs the last item in the list and initializes it and

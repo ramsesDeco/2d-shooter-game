@@ -28,7 +28,7 @@ export class Ship extends Drawable {
         this.bulletPool.context = context;
         this.bulletPool.canvasHeight = canvasHeight;
         this.bulletPool.canvasWidth = canvasWidth;
-        this.bulletPool.init();
+        this.bulletPool.init('bullet');
     }
 
     move() {

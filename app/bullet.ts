@@ -7,9 +7,12 @@ import { Drawable } from './drawable';
 export class Bullet extends Drawable {
     alive: boolean; // Is true if the bullet is currently in use
 
+    private enemyBullet: boolean;
+
     constructor() {
         super();
         this.alive = false;
+        this.enemyBullet = false;
     }
 	/*
 	 * Sets the bullet values
@@ -29,11 +32,21 @@ export class Bullet extends Drawable {
     draw() {
         this.context.clearRect(this.x, this.y, this.width, this.height);
         this.y -= this.speed;
-        if (this.y <= 0 - this.height) {
+
+        if (!this.enemyBullet && this.y <= 0 - this.height) {
+            return true;
+        }
+        else if (this.enemyBullet && this.y >= this.canvasHeight) {
             return true;
         }
         else {
-            this.context.drawImage(ImageRepository.bullet, this.x, this.y);
+            if (!this.enemyBullet) {
+                this.context.drawImage(ImageRepository.bullet, this.x, this.y);
+            }
+            else if (this.enemyBullet) {
+                this.context.drawImage(ImageRepository.ship_enemyBullet, this.x, this.y);
+            }
+            return false;
         }
     };
     /*
@@ -44,5 +57,9 @@ export class Bullet extends Drawable {
         this.y = 0;
         this.speed = 0;
         this.alive = false;
+    };
+
+    markAsEnemyBullet() {
+        this.enemyBullet = true;
     };
 }

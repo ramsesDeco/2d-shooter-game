@@ -1,5 +1,6 @@
 import { Background } from './background';
 import { Ship } from './ship';
+import { Pool } from './pool';
 import { Bullet } from './bullet';
 import ImageRepository from './image-repository';
 /**
@@ -18,6 +19,7 @@ export class Game {
 
     private background: Background;
     private ship: Ship;
+    private enemyShipPool: Pool;
 
     constructor() {
         this.background = new Background
@@ -66,6 +68,29 @@ export class Game {
             this.ship.init(shipStartX, shipStartY, ImageRepository.spaceship.width,
                 ImageRepository.spaceship.height);
 
+
+
+            // Initialize the enemy pool object
+            this.enemyShipPool = new Pool(30);
+            this.enemyShipPool.context = this.mainContext;
+            this.enemyShipPool.canvasWidth = this.mainCanvas.width;
+            this.enemyShipPool.canvasHeight = this.mainCanvas.height;
+            this.enemyShipPool.init('enemyShip');
+            let height = ImageRepository.ship_enemy.height;
+            let width = ImageRepository.ship_enemy.width;
+            let x = 100;
+            let y = -height;
+            let spacer = y * 1.5;
+            for (let i = 1; i <= 18; i++) {
+                this.enemyShipPool.get(x, y, 2);
+                x += width + 25;
+                if (i % 6 == 0) {
+                    x = 100;
+                    y += spacer
+                }
+            }
+            // this.enemyBulletPool = new Pool(50);
+            // this.enemyBulletPool.init("enemyBullet");
             return true;
         } else {
             return false;
@@ -83,6 +108,7 @@ export class Game {
         this.background.draw();
         this.ship.move()
         this.ship.bulletPool.animate();
+        this.enemyShipPool.animate();
     }
 }
 
