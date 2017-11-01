@@ -5,18 +5,20 @@ html(lang='es')
     meta(name='viewport', content='width=device-width, initial-scale=1.0')
     link(rel='stylesheet', href='css/index.css')
   body
-    // The canvas for the panning background
-    canvas#background(width='600', height='360')
-      | Your browser does not support canvas. Please try again with a different browser.
-    
-    // The canvas for all enemy ships and bullets
-    canvas#main(width='600', height='360')
-  
-    //
-      The canvas the ship uses (can only move up
-      one forth the screen.)
-    canvas#ship(width='600', height='360')
+    #container
+      .container
+        // The canvas for the panning background
+        canvas#background(width='600', height='360')
+          | Your browser does not support canvas. Please try again with a different browser.
+        
+        // The canvas for all enemy ships and bullets
+        canvas#main(width='600', height='360')
+      
+        //
+          The canvas the ship uses (can only move up
+          one forth the screen.)
+        canvas#ship(width='600', height='360')
 
-    include _includes/score.pug
-    include _includes/game-over.pug
+        include _includes/score.pug
+        include _includes/game-over.pug
     script(src='./js/index.js')
