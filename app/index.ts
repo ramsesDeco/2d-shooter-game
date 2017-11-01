@@ -11,10 +11,8 @@ import { Game } from './game';
 var game = new Game();
 
 function init() {
-    console.log('init');
     if (game.init())
         game.start();
 }
 
 window.onload = init;
-window.init = init;

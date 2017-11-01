@@ -6,8 +6,11 @@ class ImageRepository {
     public spaceship: HTMLImageElement;
     public bullet: HTMLImageElement;
 
-    public ship_enemy: HTMLImageElement;
-    public ship_enemyBullet: HTMLImageElement;
+    public enemy_bullet: HTMLImageElement;
+    public enemy_1: HTMLImageElement;
+    public enemy_2: HTMLImageElement;
+    public enemy_3: HTMLImageElement;
+    public enemy_4: HTMLImageElement;
 
     private numLoaded: number;
     private numImages: number;
@@ -15,12 +18,17 @@ class ImageRepository {
 
     constructor() {
         this.numLoaded = 0;
-        this.numImages = 5;
+        this.numImages = 8;
         this.background = this.createImage("assets/sprites/bg.png");
         this.spaceship = this.createImage("assets/sprites/ship.png");
         this.bullet = this.createImage("assets/sprites/bullet.png");
-        this.ship_enemy = this.createImage("assets/sprites/enemies/ship-enemy.png");
-        this.ship_enemyBullet = this.createImage("assets/sprites/enemies/ship-enemy-bullet.png");
+
+        this.enemy_bullet = this.createImage("assets/sprites/enemies/enemy_bullet.png");
+
+        this.enemy_1 = this.createImage("assets/sprites/enemies/enemy_1.png");
+        this.enemy_2 = this.createImage("assets/sprites/enemies/enemy_2.png");
+        this.enemy_3 = this.createImage("assets/sprites/enemies/enemy_3.png");
+        this.enemy_4 = this.createImage("assets/sprites/enemies/enemy_4.png");
     }
 
     private createImage(pathUrl: string): HTMLImageElement {

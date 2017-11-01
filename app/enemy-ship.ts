@@ -16,23 +16,22 @@ export class EnemyShip extends Drawable {
     bulletPool: Pool;
     collidableWith: string;
     type: string;
-
+    imageEnemy: HTMLImageElement;
 
     constructor() {
         super();
-        this.percentFire = 0.005;
+        this.percentFire = 0.01;
         this.chance = 0;
-        // this.alive = false;
         this.bulletPool = new Pool(30);
         this.collidableWith = 'bullet';
-        this.type = 'enemyShip';
+        this.type = 'enemy';
     }
 
     setAreaBulletPool(context: CanvasRenderingContext2D, canvasHeight: number, canvasWidth: number) {
         this.bulletPool.context = context;
         this.bulletPool.canvasHeight = canvasHeight;
         this.bulletPool.canvasWidth = canvasWidth;
-        this.bulletPool.init('shipEnemyBullet');
+        this.bulletPool.init('enemy_bullet');
     }
 
 
@@ -48,7 +47,8 @@ export class EnemyShip extends Drawable {
         this.alive = true;
         this.leftEdge = this.x - 90;
         this.rightEdge = this.x + 90;
-        this.bottomEdge = this.y + (this.height * 3) + 50;
+        this.bottomEdge = this.y + (this.height * 3) + 80;
+        this.collidableHits = 0;
     };
 	/*
 	 * Move the enemy
@@ -71,25 +71,25 @@ export class EnemyShip extends Drawable {
         }
 
         if (!this.isColliding) {
-            this.context.drawImage(ImageRepository.ship_enemy, this.x, this.y);
+            this.context.drawImage(this.imageEnemy, this.x, this.y);
             // Enemy has a chance to shoot every movement
-            this.chance = Math.floor(Math.random() * (1000 + 1));
-            if (this.chance / 1000 < this.percentFire) {
+            this.chance = Math.floor(Math.random() * (100 + 1));
+            if (this.chance / 100 < this.percentFire) {
                 this.fire();
             }
             this.bulletPool.animate();
 
             return false;
         } else {
-            GlobalEventService.enemyDestroyed('enemyShip');
+            this.onDestroyEnemy();
             return true;
         }
     };
+    onDestroyEnemy() { }
     /*
      * Fires a bullet
      */
     fire() {
-        // game.enemyBulletPool.get(this.x + this.width / 2, this.y + this.height, -2.5);
         this.bulletPool.get(this.x + this.width / 2, this.y + this.height, -2.5);
     }
     /*

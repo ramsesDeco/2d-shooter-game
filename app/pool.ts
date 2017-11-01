@@ -1,6 +1,10 @@
 import ImageRepository from './image-repository';
 import { Bullet } from './bullet';
 import { EnemyShip } from './enemy-ship';
+import { Enemy_1 } from './enemy-1';
+import { Enemy_2 } from './enemy-2';
+import { Enemy_3 } from './enemy-3';
+import { Enemy_4 } from './enemy-4';
 /**
  * Custom Pool object. Holds Bullet objects to be managed to prevent
  * garbage collection.
@@ -31,31 +35,31 @@ export class Pool {
                 bullet.context = this.context;
                 bullet.canvasHeight = this.canvasHeight;
                 bullet.canvasWidth = this.canvasWidth;
-                bullet.collidableWith = 'enemyShip';
+                bullet.collidableWith = 'enemy';
                 bullet.type = 'bullet';
                 this.pool[i] = bullet;
             }
         }
-        else if (type == 'enemyShip') {
+        else if (type == 'enemy') {
             for (let i = 0; i < this.size; i++) {
-                let enemy = new EnemyShip();
-                enemy.context = this.context;
-                enemy.canvasHeight = this.canvasHeight;
-                enemy.canvasWidth = this.canvasWidth;
-                enemy.init(0, 0, ImageRepository.ship_enemy.width, ImageRepository.ship_enemy.height);
-                enemy.setAreaBulletPool(enemy.context, enemy.canvasHeight, enemy.canvasWidth);
-
+                let enemy = this.generateRandomEnemy();
+                // let enemy = new Enemy_2();
+                // enemy.context = this.context;
+                // enemy.canvasHeight = this.canvasHeight;
+                // enemy.canvasWidth = this.canvasWidth;
+                // enemy.init(0, 0);
+                // enemy.setAreaBulletPool(enemy.context, enemy.canvasHeight, enemy.canvasWidth);
                 this.pool[i] = enemy;
             }
         }
-        else if (type == 'shipEnemyBullet') {
+        else if (type == 'enemy_bullet') {
             for (let i = 0; i < this.size; i++) {
                 let bullet = new Bullet();
                 bullet.markAsEnemyBullet();
-                bullet.init(0, 0, ImageRepository.ship_enemyBullet.width, ImageRepository.ship_enemyBullet.height);
+                bullet.init(0, 0, ImageRepository.enemy_bullet.width, ImageRepository.enemy_bullet.height);
 
                 bullet.collidableWith = 'ship';
-                bullet.type = 'shipEnemyBullet';
+                bullet.type = 'enemy_bullet';
                 bullet.context = this.context;
                 bullet.canvasHeight = this.canvasHeight;
                 bullet.canvasWidth = this.canvasWidth;
@@ -64,6 +68,31 @@ export class Pool {
         }
 
     };
+
+    generateRandomEnemy(): EnemyShip {
+        let randomEnemyNumber = Math.floor((Math.random() * 4) + 1);
+        let enemy: EnemyShip;
+        switch (randomEnemyNumber) {
+            case 1:
+                enemy = new Enemy_1();
+                break;
+            case 2:
+                enemy = new Enemy_2();
+                break;
+            case 3:
+                enemy = new Enemy_3();
+                break;
+            case 4:
+                enemy = new Enemy_4();
+                break;
+        }
+        enemy.context = this.context;
+        enemy.canvasHeight = this.canvasHeight;
+        enemy.canvasWidth = this.canvasWidth;
+        enemy.init(0, 0);
+        enemy.setAreaBulletPool(enemy.context, enemy.canvasHeight, enemy.canvasWidth);
+        return enemy;
+    }
 
     getPool() {
         let obj: Array<any> = [];

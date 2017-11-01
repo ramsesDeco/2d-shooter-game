@@ -17,6 +17,8 @@ export class Drawable {
     public isColliding: boolean;
     public type: string;
     public alive: boolean;
+    public collidableHits: number;
+    public collidableMaxHits: number;
 
     constructor() {
         this.speed = 0;
@@ -26,6 +28,8 @@ export class Drawable {
         this.isColliding = false;
         this.alive = false;
         this.type = '';
+        this.collidableHits = 0;
+        this.collidableMaxHits = 1;
     }
 
     init(x: number, y: number, width?: number, height?: number) {
@@ -36,6 +40,8 @@ export class Drawable {
         this.height = height;
         this.isColliding = false;
         this.alive = false;
+        this.collidableHits = 0;
+        this.collidableMaxHits = 1;
     }
 
 

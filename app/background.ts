@@ -10,12 +10,10 @@ export class Background extends Drawable {
 
     constructor() {
         super();
-        super.speed = 1; // Redefine speed of the background for panning
+        super.speed = 1;
     }
 
-    // Implement abstract function
     draw() {
-        // Pan background
         this.y += this.speed;
         this.context.drawImage(ImageRepository.background, this.x, this.y);
 

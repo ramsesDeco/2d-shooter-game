@@ -11,6 +11,7 @@ export class Bullet extends Drawable {
     constructor() {
         super();
         this.enemyBullet = false;
+        super.collidableHits = 0;
     }
 	/*
 	 * Sets the bullet values
@@ -45,7 +46,7 @@ export class Bullet extends Drawable {
                 this.context.drawImage(ImageRepository.bullet, this.x, this.y);
             }
             else if (this.enemyBullet) {
-                this.context.drawImage(ImageRepository.ship_enemyBullet, this.x, this.y);
+                this.context.drawImage(ImageRepository.enemy_bullet, this.x, this.y);
             }
             return false;
         }

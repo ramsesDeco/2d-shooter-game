@@ -32,22 +32,19 @@ export class Game {
     constructor() {
         this.background = new Background;
         this.playerScore = 0;
+        this.eventsListeners();
 
-        this.scoreBehavior();
 
-
-        document.getElementById('restart').addEventListener('click', (ev) => {
-            ev.stopPropagation();
-            console.log('restart');
-            this.restart();
-        });
-
-        document.addEventListener(GlobalEventService.gameOverEventName, (event: CustomEvent) => {
-            this.gameOver();
-        });
-        document.addEventListener(GlobalEventService.initEventName, (event: CustomEvent) => {
-            this.init();
-        });
+        window.requestAnimFrame = (function () {
+            return window.requestAnimationFrame ||
+                window.webkitRequestAnimationFrame ||
+                window.mozRequestAnimationFrame ||
+                window.oRequestAnimationFrame ||
+                window.msRequestAnimationFrame ||
+                function (callback: () => any, element: HTMLElement) {
+                    window.setTimeout(callback, 1000 / 60);
+                };
+        })();
     }
 	/*
 	 * Gets canvas information and context and sets up all game
@@ -94,22 +91,16 @@ export class Game {
             this.shipStartY = this.shipCanvas.height / 4 * 3 + ImageRepository.spaceship.height * 2;
             this.ship.init(this.shipStartX, this.shipStartY, ImageRepository.spaceship.width,
                 ImageRepository.spaceship.height);
-            // Bullet.prototype.context = this.mainContext;
-            // Bullet.prototype.canvasWidth = this.mainCanvas.width;
-            // Bullet.prototype.canvasHeight = this.mainCanvas.height;
 
             // Initialize the background object
             this.background.init(0, 0); // Set draw point to 0,0
-
-
-
 
             // Initialize the enemy pool object
             this.enemyPool = new Pool(30);
             this.enemyPool.context = this.mainContext;
             this.enemyPool.canvasWidth = this.mainCanvas.width;
             this.enemyPool.canvasHeight = this.mainCanvas.height;
-            this.enemyPool.init('enemyShip');
+            this.enemyPool.init('enemy');
             this.spawnWave();
             return true;
         } else {
@@ -125,8 +116,8 @@ export class Game {
 
     // Spawn a new wave of enemies
     spawnWave() {
-        let height = ImageRepository.ship_enemy.height;
-        let width = ImageRepository.ship_enemy.width;
+        let height = ImageRepository.enemy_1.height;
+        let width = ImageRepository.enemy_1.width;
         let x = 100;
         let y = -height;
         let spacer = y * 1.5;
@@ -141,23 +132,7 @@ export class Game {
     }
 
     private animate() {
-
-        this.quadTree.clear();
-        this.quadTree.insert(this.ship);
-
-        this.quadTree.insert(this.ship.bulletPool.getPool());
-
-        this.quadTree.insert(this.enemyPool.getPool());
-
-        // Pools of ships enemies alives
-        this.enemyPool.getPool().map((enemy: EnemyShip) => {
-            this.quadTree.insert(enemy.bulletPool.getPool());
-        });
-
-        // Pools of ships enemies dead
-        this.enemyPool.getPoolAliveBulletsOfDeadEnemies().map((poolBullet: Pool) => {
-            this.quadTree.insert(poolBullet);
-        });
+        this.fillQuadTree();
         this.detectCollision();
 
         // No more enemies
@@ -174,35 +149,67 @@ export class Game {
         }
     }
 
+
+    private fillQuadTree() {
+        this.quadTree.clear();
+        this.quadTree.insert(this.ship);
+        this.quadTree.insert(this.ship.bulletPool.getPool());
+        this.quadTree.insert(this.enemyPool.getPool());
+
+        // Pools of ships enemies alives
+        this.enemyPool.getPool().map((enemy: EnemyShip) => {
+            this.quadTree.insert(enemy.bulletPool.getPool());
+        });
+
+        // Pools of ships enemies dead
+        this.enemyPool.getPoolAliveBulletsOfDeadEnemies().map((poolBullet: Pool) => {
+            this.quadTree.insert(poolBullet);
+        });
+    }
     private detectCollision() {
         let objects: Array<any> = [];
         this.quadTree.getAllObjects(objects);
         for (let x = 0, len = objects.length; x < len; x++) {
             let obj: Array<any>;
             this.quadTree.findObjects(obj = [], objects[x]);
-
+            let counter = 0;
             for (let y = 0, length = obj.length; y < length; y++) {
 
-                // DETECT COLLISION ALGORITHM
-                if (objects[x].collidableWith === obj[y].type &&
-                    (objects[x].x < obj[y].x + obj[y].width &&
-                        objects[x].x + objects[x].width > obj[y].x &&
-                        objects[x].y < obj[y].y + obj[y].height &&
-                        objects[x].y + objects[x].height > obj[y].y)) {
-                    objects[x].isColliding = true;
-                    obj[y].isColliding = true;
+                if (counter === 0) {
+                    // DETECT COLLISION ALGORITHM
+                    if (objects[x].collidableWith === obj[y].type &&
+                        (objects[x].x < obj[y].x + obj[y].width &&
+                            objects[x].x + objects[x].width > obj[y].x &&
+                            objects[x].y < obj[y].y + obj[y].height &&
+                            objects[x].y + objects[x].height > obj[y].y)) {
+                        objects[x].collidableHits++;
+                        obj[y].collidableHits++;
+                        if (objects[x].collidableHits >= objects[x].collidableMaxHits) {
+                            objects[x].isColliding = true;
+                        }
+                        if (obj[y].collidableHits >= obj[y].collidableMaxHits) {
+                            obj[y].isColliding = true;
+                        }
+                        counter++;
+                        break;
+                    }
                 }
+            }
+
+            if (counter > 0) {
+                break;
             }
         }
     }
 
-    // Game over
-    gameOver() {
+    private gameOver() {
         document.getElementById('game-over').style.display = "block";
     };
+
     // Restart the game
-    restart() {
+    private restart() {
         document.getElementById('game-over').style.display = "none";
+        // delete all
         this.bgContext.clearRect(0, 0, this.bgCanvas.width, this.bgCanvas.height);
         this.shipContext.clearRect(0, 0, this.shipCanvas.width, this.shipCanvas.height);
         this.mainContext.clearRect(0, 0, this.mainCanvas.width, this.mainCanvas.height);
@@ -212,22 +219,53 @@ export class Game {
         this.ship.setAreaBulletPool(this.mainContext, this.mainCanvas.width, this.mainCanvas.height);
         this.ship.init(this.shipStartX, this.shipStartY,
             ImageRepository.spaceship.width, ImageRepository.spaceship.height);
-        this.enemyPool.init("enemyShip");
+
+        this.enemyPool.init("enemy");
+
         this.spawnWave();
+
         this.playerScore = 0;
         this.printScore();
+
         this.start();
     };
 
 
+    private eventsListeners() {
+        this.scoreBehavior();
+
+        document.addEventListener(GlobalEventService.initEventName, (event: CustomEvent) => {
+            this.init();
+        });
+
+        document.addEventListener(GlobalEventService.gameOverEventName, (event: CustomEvent) => {
+            this.gameOver();
+        });
+
+        document.getElementById('restart').addEventListener('click', (ev) => {
+            ev.stopPropagation();
+            this.restart();
+        });
+    }
+
     private scoreBehavior() {
         document.addEventListener(GlobalEventService.enemyDestoyEventName, (event: CustomEvent) => {
-            if (event.detail === 'enemyShip') {
+            if (event.detail === 'enemy_1') {
                 this.playerScore += 10;
+            }
+            if (event.detail === 'enemy_2') {
+                this.playerScore += 15;
+            }
+            if (event.detail === 'enemy_3') {
+                this.playerScore += 25;
+            }
+            if (event.detail === 'enemy_4') {
+                this.playerScore += 35;
             }
             this.printScore();
         });
     }
+
     private printScore() {
         let score = document.getElementById('score');
         score.innerHTML = `${this.playerScore}`;
@@ -243,14 +281,3 @@ declare global {
         msRequestAnimationFrame: FrameRequestCallback;
     }
 }
-
-window.requestAnimFrame = (function () {
-    return window.requestAnimationFrame ||
-        window.webkitRequestAnimationFrame ||
-        window.mozRequestAnimationFrame ||
-        window.oRequestAnimationFrame ||
-        window.msRequestAnimationFrame ||
-        function (callback: () => any, element: HTMLElement) {
-            window.setTimeout(callback, 1000 / 60);
-        };
-})();
