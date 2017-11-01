@@ -1,10 +1,10 @@
 import ImageRepository from './image-repository';
 import { Bullet } from './bullet';
-import { EnemyShip } from './enemy-ship';
-import { Enemy_1 } from './enemy-1';
-import { Enemy_2 } from './enemy-2';
-import { Enemy_3 } from './enemy-3';
-import { Enemy_4 } from './enemy-4';
+import { EnemyShip } from './enemy/enemy-ship';
+import { Enemy_1 } from './enemy/enemy-1';
+import { Enemy_2 } from './enemy/enemy-2';
+import { Enemy_3 } from './enemy/enemy-3';
+import { Enemy_4 } from './enemy/enemy-4';
 /**
  * Custom Pool object. Holds Bullet objects to be managed to prevent
  * garbage collection.

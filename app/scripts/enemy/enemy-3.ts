@@ -1,15 +1,15 @@
-import ImageRepository from './image-repository';
+import ImageRepository from '../image-repository';
 import { EnemyShip } from './enemy-ship';
-import GlobalEventService from './global-events';
-export class Enemy_4 extends EnemyShip {
+import GlobalEventService from '../global-events';
+export class Enemy_3 extends EnemyShip {
 
     constructor() {
         super();
     }
 
     init(x: number, y: number, width?: number, height?: number) {
-        super.init(x, y, ImageRepository.enemy_4.width, ImageRepository.enemy_4.height);
-        super.imageEnemy = ImageRepository.enemy_4;
+        super.init(x, y, ImageRepository.enemy_3.width, ImageRepository.enemy_3.height);
+        super.imageEnemy = ImageRepository.enemy_3;
         this.defineNumberOfHits();
     }
 
@@ -19,11 +19,11 @@ export class Enemy_4 extends EnemyShip {
     };
 
     onDestroyEnemy() {
-        GlobalEventService.enemyDestroyed(`${this.type}_4`);
+        GlobalEventService.enemyDestroyed(`${this.type}_3`);
     }
 
     defineNumberOfHits() {
         super.collidableHits = 0;
-        super.collidableMaxHits = 10;
+        super.collidableMaxHits = 6;
     }
 }

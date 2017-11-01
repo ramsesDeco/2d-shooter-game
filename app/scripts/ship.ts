@@ -21,7 +21,7 @@ export class Ship extends Drawable {
         this.bulletPool = new Pool(30);
         this.fireRate = 15;
         this.counter = 0;
-        this.collidableWith = 'shipEnemyBullet';
+        this.collidableWith = 'enemy_bullet';
         this.type = 'ship';
         super.alive = true;
     }

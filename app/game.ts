@@ -1,11 +1,11 @@
-import { Background } from './background';
-import { Ship } from './ship';
-import { Pool } from './pool';
-import { Bullet } from './bullet';
-import { EnemyShip } from './enemy-ship';
-import { QuadTree } from './quad-tree';
-import ImageRepository from './image-repository';
-import GlobalEventService from './global-events';
+import { Background } from './scripts/background';
+import { Ship } from './scripts/ship';
+import { Pool } from './scripts/pool';
+import { Bullet } from './scripts/bullet';
+import { EnemyShip } from './scripts/enemy/enemy-ship';
+import { QuadTree } from './scripts/quad-tree';
+import ImageRepository from './scripts/image-repository';
+import GlobalEventService from './scripts/global-events';
 /**
  * Creates the Game object which will hold all objects and data for
  * the game.

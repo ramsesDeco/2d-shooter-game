@@ -1,6 +1,6 @@
-import ImageRepository from './image-repository';
+import ImageRepository from '../image-repository';
 import { EnemyShip } from './enemy-ship';
-import GlobalEventService from './global-events';
+import GlobalEventService from '../global-events';
 export class Enemy_1 extends EnemyShip {
 
     constructor() {

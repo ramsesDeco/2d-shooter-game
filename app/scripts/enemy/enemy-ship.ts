@@ -1,7 +1,7 @@
-import ImageRepository from './image-repository';
-import { Drawable } from './drawable';
-import { Pool } from './pool';
-import GlobalEventService from './global-events';
+import ImageRepository from '../image-repository';
+import { Drawable } from '../drawable';
+import { Pool } from '../pool';
+import GlobalEventService from '../global-events';
 /**
  * Create the Enemy ship object.
  */
